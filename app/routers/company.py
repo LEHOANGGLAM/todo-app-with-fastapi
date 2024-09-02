@@ -15,7 +15,7 @@ router = APIRouter(prefix="/companies", tags=["Companies"])
 
 
 @router.get("", response_model=list[ViewCompanyModel])
-async def get_all_authors(async_db: AsyncSession = Depends(get_async_db_context)):
+async def get_all_companies(async_db: AsyncSession = Depends(get_async_db_context)):
     return await CompanyService.get_companies(async_db)
 
 @router.get("/{compapy_id}", status_code=status.HTTP_200_OK, response_model=ViewCompanyModel)
