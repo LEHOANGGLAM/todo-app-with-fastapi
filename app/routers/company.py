@@ -26,11 +26,11 @@ async def get_company_by_id(compapy_id: UUID, db: Session = Depends(get_async_db
     return compapy
 
 @router.post("", status_code=status.HTTP_201_CREATED, response_model=ViewCompanyModel)
-async def create_company(request: CreateCompanyModel,  db: Session = Depends(get_db_context)):
+def create_company(request: CreateCompanyModel,  db: Session = Depends(get_db_context)):
     return CompanyService.create_company(db, request)
 
 @router.put("/{compapy_id}", status_code=status.HTTP_200_OK, response_model=ViewCompanyModel)
-async def update_company(
+def update_company(
     compapy_id: UUID,
     request: CreateCompanyModel,
     db: Session = Depends(get_db_context),
@@ -38,21 +38,7 @@ async def update_company(
         return CompanyService.update_company(db, compapy_id, request)
 
 @router.delete("/{compapy_id}", status_code=status.HTTP_204_NO_CONTENT)
-async def delete_author(compapy_id: UUID, db: Session = Depends(get_db_context)):
+def delete_author(compapy_id: UUID, db: Session = Depends(get_db_context)):
     CompanyService.delete_company(db, compapy_id)
     
     
-#delete if user = admin or 
-
-# @router.post("", status_code=status.HTTP_201_CREATED, response_model=BookViewModel)
-# async def create_book(
-#     request: BookModel, 
-#     user: User = Depends(AuthService.token_interceptor),
-#     db: Session = Depends(get_db_context),
-#     ):
-#         if not user:
-#             raise AccessDeniedError()
-        
-#         request.owner_id = user.id
-
-#         return BookService.add_new_book(db, request)

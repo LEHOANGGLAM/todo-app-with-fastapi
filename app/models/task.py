@@ -2,6 +2,7 @@ from typing import Optional
 from pydantic import BaseModel, Field
 from schemas.base_entity import TaskStatus, TaskPriority
 from datetime import datetime
+from models import ViewUserModel
 from uuid import UUID
 
 class SearchTaskModel():
@@ -37,9 +38,10 @@ class ViewTaskModel(BaseModel):
     description: str | None = None
     status: TaskStatus
     priority: TaskPriority
-    user_id: UUID
+    user_id: UUID | None = None
     created_at: datetime | None = None
     updated_at: datetime | None = None
+    user: ViewUserModel | None = None
     
     class Config:
         from_attributes = True

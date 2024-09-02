@@ -7,7 +7,7 @@ from jose import JWTError, jwt
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from services.utils import get_current_utc_time
+from services.utils import get_current_timestamp
 from settings import JWT_SECRET, JWT_ALGORITHM
 from schemas import User, verify_password
 
@@ -21,7 +21,7 @@ def create_access_token(user: User, expires: Optional[timedelta] = None):
         "last_name": user.last_name,
         "is_admin": user.is_admin
     }
-    expire = get_current_utc_time() + expires if expires else get_current_utc_time() + timedelta(minutes=10)
+    expire = get_current_timestamp() + expires if expires else get_current_timestamp() + timedelta(minutes=10)
     claims.update({"exp": expire})
     return jwt.encode(claims, JWT_SECRET, algorithm=JWT_ALGORITHM)
 
@@ -30,7 +30,7 @@ def authenticate_user(username: str, password: str, db: Session):
 
     if not user:
         return False
-    if not verify_password(password, user.password):
+    if not verify_password(password, user.hashed_password):
         return False
     return user
 
@@ -38,8 +38,8 @@ def token_interceptor(token: str = Depends(oa2_bearer)) -> User:
     try:
         payload = jwt.decode(token, JWT_SECRET, algorithms=[JWT_ALGORITHM])
         user = User()
-        user.username = payload.get("sub")
-        user.id = UUID(payload.get("id"))
+        user.id = UUID(payload.get("sub"))
+        user.username = payload.get("username")
         user.first_name = payload.get("first_name")
         user.last_name = payload.get("last_name")
         user.is_admin = payload.get("is_admin")
