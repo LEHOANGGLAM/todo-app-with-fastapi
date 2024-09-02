@@ -19,8 +19,8 @@ async def get_all_users(async_db: AsyncSession = Depends(get_async_db_context)):
     return await UserService.get_users(async_db)
 
 @router.get("/{user_id}", status_code=status.HTTP_200_OK, response_model=ViewUserModel)
-async def get_user_by_id(user_d: UUID, db: Session = Depends(get_async_db_context)):    
-    user = UserService.get_user_by_id(db, user_d)
+async def get_user_by_id(user_id: UUID, db: Session = Depends(get_async_db_context)):    
+    user = UserService.get_user_by_id(db, user_id)
     if user is None:
         raise ResourceNotFoundError()
     return user
