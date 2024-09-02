@@ -16,10 +16,10 @@ class SearchUserModel():
         self.size = size
 
 class CreateUserModel(BaseModel):
-    email = str
+    email: str
     username: str
     hashed_password: str
-    first_name = str
+    first_name: str
     last_name: str
     is_active: bool = True 
     is_admin: bool = False
@@ -42,9 +42,9 @@ class CreateUserModel(BaseModel):
 
 class ViewUserModel(BaseModel):
     id: UUID 
-    email = str
+    email: str
     username: str
-    first_name = str
+    first_name: str
     last_name: str
     is_active: bool
     company_id: UUID
@@ -53,3 +53,4 @@ class ViewUserModel(BaseModel):
     
     class Config:
         from_attributes = True
+        

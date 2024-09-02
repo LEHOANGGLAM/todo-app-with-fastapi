@@ -33,10 +33,10 @@ class CreateTaskModel(BaseModel):
 
 class ViewTaskModel(BaseModel):
     id: UUID 
-    summary = str
+    summary: str
     description: str | None = None
-    status = TaskStatus
-    priority = TaskPriority
+    status: TaskStatus
+    priority: TaskPriority
     user_id: UUID
     created_at: datetime | None = None
     updated_at: datetime | None = None

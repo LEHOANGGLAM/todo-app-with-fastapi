@@ -27,15 +27,15 @@ class CreateCompanyModel(BaseModel):
             }
         }
 
-
 class ViewCompanyModel(BaseModel):
     id: UUID 
-    name = str
-    description: str | None = None
-    mode = CompanyMode
+    name: str 
+    description: Optional[str] = None
+    mode: CompanyMode
     rating: int
-    created_at: datetime | None = None
-    updated_at: datetime | None = None
+    created_at: datetime 
+    updated_at: datetime 
     
     class Config:
         from_attributes = True
+        
