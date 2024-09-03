@@ -39,3 +39,4 @@ alembic revision -m <comment>
 ```bash
 uvicorn main:app --reload
 ```
+Access `http://localhost:8000/docs` to experience the APIs.
