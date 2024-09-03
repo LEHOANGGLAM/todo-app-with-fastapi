@@ -1,23 +1,36 @@
 from uuid import UUID
 from sqlalchemy import select
 from sqlalchemy.orm import Session, joinedload
-from sqlalchemy.ext.asyncio import AsyncSession
 from services import utils
-from models import CreateTaskModel
+from models import CreateTaskModel, SearchTaskModel
 from schemas import Task, User
 from services.exception import ResourceNotFoundError
-from services.user import get_user_by_id
 
 
-def get_tasks(db: Session, user: User, /, joined_load = False) -> list[Task]:
-    if user.is_admin is False:
-        return get_tasks_by_user(db, user, joined_load)
-    return db.scalars(select(Task).order_by(Task.created_at)).all()  
-
-def get_tasks_by_user(db: Session, user: User, /, joined_load = False) -> list[Task]:   
-    query = select(Task).filter(Task.user_id == user.id)
+def get_tasks(conds: SearchTaskModel, user: User, db: Session, /, joined_load=False) -> list[Task]:
+    # Start building the base query
+    query = select(Task).order_by(Task.created_at)
+    
+    # Apply filters based on conds
+    if conds.summary is not None:
+        query = query.filter(Task.summary.like(f"%{conds.summary}%"))
+    if conds.status is not None:
+        query = query.filter(Task.status == conds.status)
+    if conds.priority is not None:
+        query = query.filter(Task.priority == conds.priority)
+    
+    # Apply user-specific filter if the user is not an admin
+    if not user.is_admin:
+        query = query.filter(Task.user_id == user.id)
+    
+    # Apply joined load if necessary
     if joined_load:
-        query.options(joinedload(Task.user, innerjoin=True))  
+        query = query.options(joinedload(Task.user, innerjoin=True))
+    
+    # Apply pagination
+    query = query.offset((conds.page - 1) * conds.size).limit(conds.size)
+    
+    # Execute the query and return the results
     return db.scalars(query).all() 
 
 def get_task_by_id(db: Session, task_id: UUID, user: User, /, joined_load = False) -> Task:

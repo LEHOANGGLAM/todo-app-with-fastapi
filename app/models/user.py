@@ -5,10 +5,9 @@ from datetime import datetime
 from uuid import UUID
 
 class SearchUserModel():
-    def __init__(self, email, username, priority, first_name, last_name, is_active, page, size) -> None:
+    def __init__(self, email, username, first_name, last_name, is_active, page, size) -> None:
         self.email = email
         self.username = username
-        self.priority = priority
         self.first_name = first_name
         self.last_name = last_name
         self.is_active = is_active

@@ -1,22 +1,29 @@
 from uuid import UUID
 from starlette import status
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm import Session
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from database import get_async_db_context, get_db_context
-from models.user import ViewUserModel, CreateUserModel
-from services.exception import ResourceNotFoundError, AccessDeniedError
+from models.user import ViewUserModel, CreateUserModel, SearchUserModel
+from services.exception import ResourceNotFoundError
 from services import user as UserService
-from services import auth as AuthService
-from schemas import User
 
 router = APIRouter(prefix="/users", tags=["Users"])
 
 
 @router.get("", response_model=list[ViewUserModel])
-async def get_all_users(async_db: AsyncSession = Depends(get_async_db_context)):
-    return await UserService.get_users(async_db)
+async def get_all_users(
+    email: str = Query(default=None),
+    username: str = Query(default=None),
+    first_name: str = Query(default=None),
+    last_name: str = Query(default=None),
+    is_active: bool = Query(default=None),
+    page: int = Query(ge=1, default=1),
+    size: int = Query(ge=1, le=50, default=10),
+    async_db: AsyncSession = Depends(get_async_db_context)):
+    conds = SearchUserModel(email, username, first_name, last_name, is_active, page, size)
+    return await UserService.get_users(conds, async_db)
 
 @router.get("/{user_id}", status_code=status.HTTP_200_OK, response_model=ViewUserModel)
 async def get_user_by_id(user_id: UUID, db: Session = Depends(get_async_db_context)):    

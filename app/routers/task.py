@@ -1,22 +1,28 @@
 from uuid import UUID
 from starlette import status
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm import Session
-from sqlalchemy.ext.asyncio import AsyncSession
 
-from database import get_async_db_context, get_db_context
-from models.task import ViewTaskModel, CreateTaskModel
-from services.exception import ResourceNotFoundError, AccessDeniedError
+from database import get_db_context
+from models.task import ViewTaskModel, CreateTaskModel, SearchTaskModel
+from services.exception import ResourceNotFoundError
 from services import task as TaskService
 from services import auth as AuthService
-from schemas import User
+from schemas import User, TaskStatus, TaskPriority
+
 
 router = APIRouter(prefix="/tasks", tags=["Tasks"])
 
-
 @router.get("", response_model=list[ViewTaskModel])
-def get_all_tasks(db: Session = Depends(get_db_context), user: User = Depends(AuthService.token_interceptor)):    
-    return TaskService.get_tasks(db, user, joined_load=True)
+def get_all_tasks(
+    summary: str = Query(default=None),
+    status: TaskStatus = Query(default=None),
+    priority: TaskPriority = Query(default=None),
+    page: int = Query(ge=1, default=1),
+    size: int = Query(ge=1, le=50, default=10), 
+    db: Session = Depends(get_db_context), user: User = Depends(AuthService.token_interceptor)):  
+    conds = SearchTaskModel(summary, status, priority, page, size)  
+    return TaskService.get_tasks(conds, user, db, joined_load=True)
 
 @router.get("/{task_id}", status_code=status.HTTP_200_OK, response_model=ViewTaskModel)
 def get_task_by_id(task_id: UUID, db: Session = Depends(get_db_context), user: User = Depends(AuthService.token_interceptor)):    

@@ -1,22 +1,26 @@
 from uuid import UUID
 from starlette import status
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm import Session
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from database import get_async_db_context, get_db_context
-from models.company import ViewCompanyModel, CreateCompanyModel
-from services.exception import ResourceNotFoundError, AccessDeniedError
+from models.company import ViewCompanyModel, CreateCompanyModel, SearchCompanyModel
+from services.exception import ResourceNotFoundError
 from services import company as CompanyService
-from services import auth as AuthService
-from schemas import User
+from schemas import CompanyMode
 
 router = APIRouter(prefix="/companies", tags=["Companies"])
 
 
 @router.get("", response_model=list[ViewCompanyModel])
-async def get_all_companies(async_db: AsyncSession = Depends(get_async_db_context)):
-    return await CompanyService.get_companies(async_db)
+async def get_all_companies(
+    name: str = Query(default=None),
+    mode: CompanyMode = Query(default=None),
+    page: int = Query(ge=1, default=1),
+    size: int = Query(ge=1, le=50, default=10), async_db: AsyncSession = Depends(get_async_db_context)):
+    conds = SearchCompanyModel(name, mode, page, size)
+    return await CompanyService.get_companies(conds, async_db)
 
 @router.get("/{compapy_id}", status_code=status.HTTP_200_OK, response_model=ViewCompanyModel)
 async def get_company_by_id(compapy_id: UUID, db: Session = Depends(get_async_db_context)):    
